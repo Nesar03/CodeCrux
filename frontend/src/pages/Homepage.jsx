@@ -52,7 +52,9 @@ function Homepage() {
   });
 
   return (
+    
     <div className="min-h-screen bg-base-200">
+      
       {/* Navigation Bar */}
       <nav className="navbar bg-base-100 shadow-lg px-4">
         <div className="flex-1">
@@ -108,6 +110,43 @@ function Homepage() {
             <option value="dp">DP</option>
           </select>
         </div>
+
+
+        {/* ---------------------------------------------------------------------------------------------------------------------- */}
+
+        {/* Quick Stats Header */}
+<div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-8">
+  <div className="p-4 rounded-2xl bg-neutral-900/60 border border-neutral-800 backdrop-blur-sm shadow-lg">
+    <div className="text-xs uppercase font-medium tracking-wider text-neutral-400">Total Solved</div>
+    <div className="mt-1 flex items-baseline gap-2">
+      <span className="text-3xl font-extrabold text-white">{solvedProblems.length}</span>
+      <span className="text-xs text-neutral-500">/ {problems.length}</span>
+    </div>
+  </div>
+
+  <div className="p-4 rounded-2xl bg-neutral-900/60 border border-emerald-500/20 backdrop-blur-sm shadow-lg">
+    <div className="text-xs uppercase font-medium tracking-wider text-emerald-400">Easy</div>
+    <div className="mt-1 text-2xl font-bold text-emerald-400">
+      {solvedProblems.filter(p => p.difficulty?.toLowerCase() === 'easy').length}
+    </div>
+  </div>
+
+  <div className="p-4 rounded-2xl bg-neutral-900/60 border border-amber-500/20 backdrop-blur-sm shadow-lg">
+    <div className="text-xs uppercase font-medium tracking-wider text-amber-400">Medium</div>
+    <div className="mt-1 text-2xl font-bold text-amber-400">
+      {solvedProblems.filter(p => p.difficulty?.toLowerCase() === 'medium').length}
+    </div>
+  </div>
+
+  <div className="p-4 rounded-2xl bg-neutral-900/60 border border-rose-500/20 backdrop-blur-sm shadow-lg">
+    <div className="text-xs uppercase font-medium tracking-wider text-rose-400">Hard</div>
+    <div className="mt-1 text-2xl font-bold text-rose-400">
+      {solvedProblems.filter(p => p.difficulty?.toLowerCase() === 'hard').length}
+    </div>
+  </div>
+</div>
+
+--
 
         {/* Problems List */}
         <div className="grid gap-4">
