@@ -49,7 +49,7 @@ const solveDoubt = async (req, res) => {
 
         const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_KEY });
         const response = await ai.models.generateContent({
-            model: process.env.GEMINI_MODEL || "gemini-3.8-flash",
+            model: process.env.GEMINI_MODEL || "gemini-3.5-flash",
             contents,
             config: {
                 systemInstruction: buildSystemPrompt({ title, description, testCases, startCode })
