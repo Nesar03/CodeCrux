@@ -111,9 +111,6 @@ function Homepage() {
           </select>
         </div>
 
-
-        {/* ---------------------------------------------------------------------------------------------------------------------- */}
-
         {/* Quick Stats Header */}
 <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-8">
   <div className="p-4 rounded-2xl bg-neutral-900/60 border border-neutral-800 backdrop-blur-sm shadow-lg">
