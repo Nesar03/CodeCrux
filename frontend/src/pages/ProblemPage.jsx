@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import Editor from '@monaco-editor/react';
 import { useParams, NavLink } from 'react-router';
@@ -30,6 +30,8 @@ const ProblemPage = () => {
   // const [code, setCode] = useState('');
   const [codeByLang, setCodeByLang] = useState({ javascript: '', java: '', cpp: '' });
   const [loading, setLoading] = useState(false);
+  const [problemLoading, setProblemLoading] = useState(true);
+const [loadError, setLoadError] = useState(null);
   const [runResult, setRunResult] = useState(null);
   const [submitResult, setSubmitResult] = useState(null);
   const [activeLeftTab, setActiveLeftTab] = useState('description');
@@ -43,39 +45,37 @@ const ProblemPage = () => {
 
   const { handleSubmit } = useForm();
 
- useEffect(() => {
-    const fetchProblem = async () => {
-      setLoading(true);
-      try {
-        
-        const response = await axiosClient.get(`/problem/problemById/${problemId}`);
-       
-        
-        // const initialCode = getStarterCode(response.data, selectedLanguage);
+ const fetchProblem = useCallback(async () => {
+  setProblemLoading(true);
+  setLoadError(null);
+  setProblem(null);                 // don't show the previous problem while loading a new one
+  try {
+    const response = await axiosClient.get(`/problem/problemById/${problemId}`);
+    setProblem(response.data);
+    setCodeByLang({
+      javascript: getStarterCode(response.data, 'javascript'),
+      java: getStarterCode(response.data, 'java'),
+      cpp: getStarterCode(response.data, 'cpp'),
+    });
+  } catch (error) {
+    console.error('Error fetching problem:', error);
+    const status = error.response?.status;
+    setLoadError({
+      status,
+      message:
+        status === 404 ? 'This problem does not exist.' :
+        status === 400 ? 'The problem link is invalid.' :
+        !error.response ? 'Network error. Check your connection and try again.' :
+        getErrorMessage(error, 'Failed to load the problem.'),
+    });
+  } finally {
+    setProblemLoading(false);
+  }
+}, [problemId]);
 
-        // setProblem(response.data);
-        
-        // setCode(initialCode);
-        // setLoading(false);
-
-        setProblem(response.data);
-
-// Load the starter code for ALL languages once
-setCodeByLang({
-  javascript: getStarterCode(response.data, 'javascript'),
-  java: getStarterCode(response.data, 'java'),
-  cpp: getStarterCode(response.data, 'cpp'),
-});
-setLoading(false);
-        
-      } catch (error) {
-        console.error('Error fetching problem:', error);
-        setLoading(false);
-      }
-    };
-
-    fetchProblem();
-  }, [problemId]);
+useEffect(() => {
+  fetchProblem();
+}, [fetchProblem]);
 
   // Update code when language changes
   // useEffect(() => {
@@ -171,13 +171,29 @@ setLoading(false);
     }
   };
 
-  if (loading && !problem) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <span className="loading loading-spinner loading-lg"></span>
+  if (problemLoading) {
+  return (
+    <div className="flex justify-center items-center min-h-screen">
+      <span className="loading loading-spinner loading-lg"></span>
+    </div>
+  );
+}
+
+if (loadError || !problem) {
+  const canRetry = !loadError?.status || loadError.status >= 500;
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen gap-4 p-6 text-center">
+      <h2 className="text-xl font-bold">Couldn't load this problem</h2>
+      <p className="text-base-content/70">{loadError?.message || 'Something went wrong.'}</p>
+      <div className="flex gap-2">
+        {canRetry && (
+          <button className="btn btn-primary btn-sm" onClick={fetchProblem}>Retry</button>
+        )}
+        <NavLink to="/" className="btn btn-ghost btn-sm">Back to problems</NavLink>
       </div>
-    );
-  }
+    </div>
+  );
+}
 
   return (
     <div className="h-screen flex flex-col bg-base-100">
@@ -321,12 +337,15 @@ setLoading(false);
                 </div>
               )}
 
+
               <div className={`prose max-w-none ${activeLeftTab === 'chatAI' ? '' : 'hidden'}`}>
   <h2 className="text-xl font-bold mb-4">CHAT with AI</h2>
   <div className="whitespace-pre-wrap text-sm leading-relaxed">
     <ChatAi key={problem._id} problem={problem} />
   </div>
 </div>
+
+              
             </>
           )}
         </div>
