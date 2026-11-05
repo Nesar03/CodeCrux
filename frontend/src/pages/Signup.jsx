@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, NavLink } from 'react-router';
-import { registerUser } from '../authSlice';
+import { registerUser, clearError } from '../authSlice';
 
 const signupSchema = z.object({
   firstName: z.string().min(3, "Minimum character should be 3"),
@@ -34,6 +34,12 @@ function Signup() {
       navigate('/');
     }
   }, [isAuthenticated, navigate]);
+
+  useEffect(() => {
+  return () => {
+    dispatch(clearError());
+  };
+}, [dispatch]);
 
   const onSubmit = (data) => {
     dispatch(registerUser(data));
