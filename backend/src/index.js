@@ -11,6 +11,7 @@ const aiRouter = require("./routes/aiChatting");
 const videoRouter = require("./routes/videoCreator");
 
 const app = express();
+app.set('trust proxy', 1);
 
 app.use(cors({
     origin: process.env.FRONTEND_URL || 'http://localhost:5173',
