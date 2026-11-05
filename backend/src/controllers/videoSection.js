@@ -77,6 +77,26 @@ const saveVideoMetadata = async (req, res) => {
       thumbnailUrl
     });
 
+ // Replace: remove any older videos for this problem.
+// The new one is already saved, so a failure here never leaves the problem with no video.
+const oldVideos = await SolutionVideo.find({
+  problemId,
+  _id: { $ne: videoSolution._id }
+});
+
+for (const old of oldVideos) {
+  try {
+    await cloudinary.uploader.destroy(old.cloudinaryPublicId, {
+      resource_type: 'video',
+      invalidate: true
+    });
+    await SolutionVideo.deleteOne({ _id: old._id });
+  } catch (err) {
+    // Keep the record if Cloudinary failed, so it can be retried or cleaned up later
+    console.error('Failed to remove old video', old.cloudinaryPublicId, err.message);
+  }
+}
+
     res.status(201).json({
       message: 'Video solution saved successfully',
       videoSolution: {
@@ -98,16 +118,21 @@ const deleteVideo = async (req, res) => {
     if (!mongoose.isValidObjectId(problemId))
       return res.status(400).json({ error: 'Invalid problem ID' });
 
-    const video = await SolutionVideo.findOne({ problemId });
-    if (!video) {
-      return res.status(404).json({ error: 'Video not found' });
-    }
+    const videos = await SolutionVideo.find({ problemId });
+if (videos.length === 0) {
+  return res.status(404).json({ error: 'Video not found' });
+}
 
-    // Remove from Cloudinary first; only delete the DB record if that worked
-    await cloudinary.uploader.destroy(video.cloudinaryPublicId, { resource_type: 'video', invalidate: true });
-    await SolutionVideo.deleteOne({ _id: video._id });
+// Remove from Cloudinary first; only delete each DB record if that worked
+for (const video of videos) {
+  await cloudinary.uploader.destroy(video.cloudinaryPublicId, {
+    resource_type: 'video',
+    invalidate: true
+  });
+  await SolutionVideo.deleteOne({ _id: video._id });
+}
 
-    res.json({ message: 'Video deleted successfully' });
+res.json({ message: 'Video deleted successfully' });
   } catch (error) {
     console.error('Error deleting video:', error);
     res.status(500).json({ error: 'Failed to delete video' });
