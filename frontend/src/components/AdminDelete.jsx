@@ -30,7 +30,7 @@ const AdminDelete = () => {
     
     try {
       await axiosClient.delete(`/problem/delete/${id}`);
-      setProblems(problems.filter(problem => problem._id !== id));
+      setProblems(prev => prev.filter(problem => problem._id !== id));
     } catch (err) {
       setError(getErrorMessage(err, 'Failed to delete problem'));
       console.error(err);
