@@ -18,13 +18,7 @@ const buildVideoUrl = (url, transform) => {
 };
 
 const Editorial = ({ secureUrl, thumbnailUrl, duration }) => {
-  if (!secureUrl) {
-    return (
-      <div className="alert alert-info">
-        <span>No video editorial is available for this problem yet.</span>
-      </div>
-    );
-  }
+  
 
   const containerRef = useRef(null);
   const videoRef = useRef(null);
@@ -38,6 +32,22 @@ const Editorial = ({ secureUrl, thumbnailUrl, duration }) => {
   const [quality, setQuality] = useState('Original');
   const [openMenu, setOpenMenu] = useState(null); // 'speed' | 'quality' | null
   const [switching, setSwitching] = useState(false);
+
+  useEffect(() => {
+    const onChange = () => setIsFullscreen(document.fullscreenElement === containerRef.current);
+    document.addEventListener('fullscreenchange', onChange);
+    return () => document.removeEventListener('fullscreenchange', onChange);
+  }, []);
+
+  const showControls = isHovering || !isPlaying || openMenu !== null;
+
+  if (!secureUrl) {
+    return (
+      <div className="alert alert-info">
+        <span>No video editorial is available for this problem yet.</span>
+      </div>
+    );
+  }
 
   const currentQuality = QUALITIES.find((q) => q.label === quality) || QUALITIES[0];
   const videoSrc = buildVideoUrl(secureUrl, currentQuality.transform);
@@ -102,13 +112,15 @@ const Editorial = ({ secureUrl, thumbnailUrl, duration }) => {
     }
   };
 
-  useEffect(() => {
-    const onChange = () => setIsFullscreen(document.fullscreenElement === containerRef.current);
-    document.addEventListener('fullscreenchange', onChange);
-    return () => document.removeEventListener('fullscreenchange', onChange);
-  }, []);
+  const handleVideoError = () => {
+  if (quality !== 'Original') {
+    resumeRef.current = null;
+    setSwitching(false);
+    setQuality('Original');
+  }
+};
 
-  const showControls = isHovering || !isPlaying || openMenu !== null;
+  
 
   return (
     <div
@@ -120,6 +132,7 @@ const Editorial = ({ secureUrl, thumbnailUrl, duration }) => {
       onMouseLeave={() => setIsHovering(false)}
     >
       <video
+        onError={handleVideoError}
         ref={videoRef}
         src={videoSrc}
         poster={thumbnailUrl}
