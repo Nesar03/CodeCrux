@@ -143,7 +143,6 @@ function Homepage() {
   </div>
 </div>
 
---
 
         {/* Problems List */}
         <div className="grid gap-4">
