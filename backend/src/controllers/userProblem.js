@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const cloudinary = require('cloudinary').v2;
 const { executeTestCases, getLanguageConfig } = require("../utils/problemUtility");
 const Problem = require("../models/problem");
 const User = require("../models/user");
@@ -94,6 +95,24 @@ const deleteProblem = async (req, res) => {
         if (!deletedProblem)
             return res.status(404).send("Problem not found");
 
+        // Fetch videos BEFORE deleting their DB records, so we still have the Cloudinary IDs
+        const videos = await SolutionVideo.find({ problemId: id });
+
+        // Remove the files from Cloudinary. allSettled means one failure won't stop the rest.
+        const results = await Promise.allSettled(
+            videos.map((v) =>
+                cloudinary.uploader.destroy(v.cloudinaryPublicId, {
+                    resource_type: 'video',
+                    invalidate: true
+                })
+            )
+        );
+        results.forEach((r, i) => {
+            if (r.status === 'rejected') {
+                console.error('Cloudinary delete failed for', videos[i].cloudinaryPublicId, r.reason?.message);
+            }
+        });
+
         // Clean up everything that referenced the problem
         await Promise.all([
             Submission.deleteMany({ problemId: id }),
@@ -127,7 +146,7 @@ const getProblemById = async (req, res) => {
 
         const responseData = getProblem.toObject();
 
-        const video = await SolutionVideo.findOne({ problemId: id });
+        const video = await SolutionVideo.findOne({ problemId: id }).sort({createdAt: -1});
         if (video) {
             responseData.secureUrl = video.secureUrl;
             responseData.thumbnailUrl = video.thumbnailUrl;
