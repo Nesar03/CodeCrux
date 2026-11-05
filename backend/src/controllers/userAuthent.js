@@ -7,11 +7,13 @@ const Submission = require("../models/submission");
 
 const ONE_HOUR = 60 * 60;
 
+const isProd = process.env.NODE_ENV === 'production';
+
 const cookieOptions = () => ({
     maxAge: ONE_HOUR * 1000,
     httpOnly: true,
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production'
+    secure: isProd,
+    sameSite: isProd ? 'none' : 'lax',
 });
 
 const publicUser = (user) => ({
