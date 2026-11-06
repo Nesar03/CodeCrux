@@ -46,13 +46,6 @@ const getLanguageConfig = (lang) => {
   return JDOODLE_LANGUAGE_MAP[key] || null;
 };
 
-/**
- * Legacy compatibility helper
- */
-const getLanguageById = (lang) => {
-  const config = getLanguageConfig(lang);
-  return config ? config.language : undefined;
-};
 
 /**
  * Normalize output string for reliable test case comparison.
@@ -353,37 +346,13 @@ const executeTestCases = async (code, language, testCases) => {
   return results;
 };
 
-/**
- * Check credits spent via JDoodle /v1/credit-spent endpoint (free call).
- */
-const getCreditSpent = async () => {
-  const clientId = process.env.JDOODLE_CLIENT_ID;
-  const clientSecret = process.env.JDOODLE_CLIENT_SECRET;
 
-  if (!clientId || !clientSecret) {
-    return null;
-  }
-
-  try {
-    const response = await axios.post(
-      'https://api.jdoodle.com/v1/credit-spent',
-      { clientId, clientSecret },
-      { headers: { 'Content-Type': 'application/json' }, timeout: 10000 }
-    );
-    return response.data?.used ?? 0;
-  } catch (err) {
-    console.error('Failed to check JDoodle credits:', err.message);
-    return null;
-  }
-};
 
 module.exports = {
   JDOODLE_LANGUAGE_MAP,
   getLanguageConfig,
-  getLanguageById,
   normalizeOutput,
   determineVerdict,
   executeSingleTestCase,
   executeTestCases,
-  getCreditSpent
 };
