@@ -2,7 +2,7 @@
 
 # CodeCrux
 
-**A full-stack, LeetCode-style coding practice platform: solve DSA problems in the browser, get judged against hidden test cases, and learn with an AI tutor and editorial videos.**
+**A full-stack, coding practice platform: solve DSA problems in the browser, get judged against hidden test cases, and learn with an AI tutor and editorial videos.**
 
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white)
