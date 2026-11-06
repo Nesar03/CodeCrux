@@ -163,7 +163,7 @@ const runCode = async (req, res) => {
 
         runtime = Math.round(runtime * 1000) / 1000;
 
-        res.status(201).json({
+        res.status(200).json({
             success: status,
             testCases: testResult,
             runtime,
