@@ -1,0 +1,62 @@
+erDiagram
+    USER {
+        ObjectId _id PK
+        string firstName "required, 3-20 chars"
+        string lastName "optional, 3-20 chars"
+        string emailId UK "required, trimmed, lowercase, immutable"
+        number age "optional, 6-80"
+        string role "user or admin, default user"
+        string profilePic "default empty, not used by the UI"
+        array problemSolved FK "ObjectId refs to PROBLEM"
+        string password "bcrypt hash"
+        date createdAt
+        date updatedAt
+    }
+
+    PROBLEM {
+        ObjectId _id PK
+        string title "required"
+        string description "required"
+        string difficulty "easy, medium or hard"
+        string tags "single value: array, linkedList, graph or dp"
+        array visibleTestCases "input, output, explanation"
+        array hiddenTestCases "input, output"
+        array startCode "language, initialCode"
+        array referenceSolution "language, completeCode"
+        ObjectId problemCreator FK "refs USER, required"
+    }
+
+    SUBMISSION {
+        ObjectId _id PK
+        ObjectId userId FK "refs USER, indexed with problemId"
+        ObjectId problemId FK "refs PROBLEM, indexed with userId"
+        string code "required"
+        string language "javascript, c++ or java"
+        string status "pending, accepted, wrong or error"
+        number runtime "seconds"
+        number memory "kB"
+        string errorMessage "default empty"
+        number testCasesPassed "default 0"
+        number testCasesTotal "default 0"
+        date createdAt
+        date updatedAt
+    }
+
+    SOLUTION_VIDEO {
+        ObjectId _id PK
+        ObjectId problemId FK "refs PROBLEM"
+        ObjectId userId FK "refs USER, the uploading admin"
+        string cloudinaryPublicId UK "required"
+        string secureUrl "required"
+        string thumbnailUrl
+        number duration "seconds, required"
+        date createdAt
+        date updatedAt
+    }
+
+    USER ||--o{ SUBMISSION : submits
+    PROBLEM ||--o{ SUBMISSION : receives
+    USER ||--o{ PROBLEM : creates
+    USER }o--o{ PROBLEM : solved
+    PROBLEM ||--o{ SOLUTION_VIDEO : has
+    USER ||--o{ SOLUTION_VIDEO : uploads
