@@ -93,10 +93,6 @@ useEffect(() => {
   setCodeByLang((prev) => ({ ...prev, [selectedLanguage]: value || '' }));
 };
 
-  const handleEditorDidMount = (editor) => {
-    editorRef.current = editor;
-  };
-
   const handleLanguageChange = (language) => {
     setSelectedLanguage(language);
   };
@@ -401,7 +397,6 @@ if (loadError || !problem) {
                   language={getLanguageForMonaco(selectedLanguage)}
                   value={code}
                   onChange={handleEditorChange}
-                  onMount={handleEditorDidMount}
                   theme="vs-dark"
                   options={{
                     fontSize: 14,
