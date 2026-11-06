@@ -27,7 +27,7 @@ const submissionSchema = new Schema({
     default: 'pending'
   },
   runtime: {
-    type: Number,  // milliseconds
+    type: Number,  // seconds
     default: 0
   },
   memory: {
