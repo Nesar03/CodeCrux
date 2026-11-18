@@ -13,8 +13,32 @@ const videoRouter = require("./routes/videoCreator");
 const app = express();
 app.set('trust proxy', 1);
 
+let frontendOrigin = 'http://localhost:5173';
+if (process.env.FRONTEND_URL) {
+    try {
+        const urlStr = process.env.FRONTEND_URL.startsWith('http')
+            ? process.env.FRONTEND_URL
+            : `https://${process.env.FRONTEND_URL}`;
+        frontendOrigin = new URL(urlStr).origin;
+    } catch {
+        frontendOrigin = process.env.FRONTEND_URL.replace(/\/+$/, '');
+    }
+}
+
+const allowedOrigins = [
+    frontendOrigin,
+    'http://localhost:5173',
+    'http://localhost:3000'
+];
+
 app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    origin: function (origin, callback) {
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+            return callback(null, true);
+        }
+        return callback(null, false);
+    },
     credentials: true
 }));
 
