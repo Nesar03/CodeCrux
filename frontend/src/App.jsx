@@ -18,9 +18,7 @@ function App() {
   const dispatch = useDispatch();
   const { isAuthenticated, user } = useSelector((state) => state.auth);
 
-  // Only block the UI during the very first session check.
-  // (Using the shared `loading` flag would unmount the Login/Signup pages
-  //  every time a login request was in flight.)
+  
   const [checkingSession, setCheckingSession] = useState(true);
 
   useEffect(() => {
